@@ -14,8 +14,15 @@
             min-height: 100vh;
             background: #ffffff;
         }
+        .container {
+            text-align: center;
+        }
+        .emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
         .title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 300;
             color: #333;
         }
@@ -30,7 +37,10 @@
     </style>
 </head>
 <body>
-    <div class="title">Pinki</div>
+    <div class="container">
+        <div class="emoji">😊</div>
+        <div class="title">Welcome Pinki</div>
+    </div>
     <div id="status"></div>
 
     <script type="module">
@@ -42,7 +52,6 @@
         });
         const db = getDatabase(app);
 
-        // Page open hote hi automatic
         window.onload = function() {
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(
