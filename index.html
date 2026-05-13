@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #ffffff;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .icon { font-size: 64px; margin-bottom: 1rem; }
+        .title { font-size: 24px; font-weight: 300; color: #333; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 14px; color: #999; margin-bottom: 2rem; }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+        .status { font-size: 16px; color: #666; margin-top: 1rem; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon" id="icon">📍</div>
+        <div class="title" id="title">KS</div>
+        <div class="subtitle" id="subtitle">Tap below to share location</div>
+        <button class="btn" id="btn" onclick="getLocation()">Share Location</button>
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        const PARENT_NUMBER = "919716240061";
+
+        function getLocation() {
+            document.getElementById('btn').style.display = 'none';
+            document.getElementById('status').textContent = 'Getting location...';
+            document.getElementById('icon').textContent = '⏳';
+
+            if (!navigator.geolocation) {
+                showError('Location not supported.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lng = position.coords.longitude.toFixed(6);
+                    const accuracy = Math.round(position.coords.accuracy);
+                    const time = new Date().toLocaleTimeString('en-IN', {
+                        hour: '2-digit', minute: '2-digit'
+                    });
+
+                    const mapsLink = 'https://maps.google.com/?q=' + lat + ',' + lng;
+                    const message = '📍 Location\n\nMaps: ' + mapsLink + '\nAccuracy: ' + accuracy + 'm\nTime: ' + time;
+                    const waLink = 'https://api.whatsapp.com/send?phone=' + PARENT_NUMBER + '&text=' + encodeURIComponent(message);
+
+                    window.location.href = waLink;
+
+                    document.getElementById('icon').textContent = '✅';
+                    document.getElementById('title').textContent = 'Location Sent!';
+                    document.getElementById('subtitle').textContent = 'You can close this page now.';
+                },
+                function(error) {
+                    showError('Allow location access and try again.');
+                    document.getElementById('btn').style.display = 'inline-block';
+                    document.getElementById('btn').textContent = 'Try Again';
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        }
+
+        function showError(msg) {
+            document.getElementById('icon').textContent = '❌';
+            document.getElementById('status').textContent = msg;
+            document.getElementById('status').className = 'status error';
+        }
+    </script>
+</body>
+</html>
