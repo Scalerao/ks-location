@@ -14,10 +14,7 @@
             min-height: 100vh;
             background: #ffffff;
         }
-        .container {
-            text-align: center;
-            padding: 2rem;
-        }
+        .container { text-align: center; padding: 2rem; }
         .icon { font-size: 64px; margin-bottom: 1rem; }
         .title { font-size: 24px; font-weight: 300; color: #333; margin-bottom: 0.5rem; }
         .subtitle { font-size: 14px; color: #999; margin-bottom: 2rem; }
@@ -43,10 +40,18 @@
         <div class="status" id="status"></div>
     </div>
 
-    <script>
-        const PARENT_NUMBER = "919716240061";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        function getLocation() {
+        const firebaseConfig = {
+            databaseURL: "https://familylocator-3808a-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.getLocation = function() {
             document.getElementById('btn').style.display = 'none';
             document.getElementById('status').textContent = 'Getting location...';
             document.getElementById('icon').textContent = '⏳';
@@ -58,22 +63,28 @@
 
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    const lat = position.coords.latitude.toFixed(6);
-                    const lng = position.coords.longitude.toFixed(6);
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
                     const accuracy = Math.round(position.coords.accuracy);
-                    const time = new Date().toLocaleTimeString('en-IN', {
-                        hour: '2-digit', minute: '2-digit'
+                    const timestamp = Date.now();
+
+                    const locationRef = ref(db, 'families/74b5bd46/ondemand/location');
+                    set(locationRef, {
+                        lat: lat,
+                        lng: lng,
+                        accuracy: accuracy,
+                        timestamp: timestamp,
+                        source: 'link'
+                    }).then(() => {
+                        document.getElementById('icon').textContent = '✅';
+                        document.getElementById('title').textContent = 'Done!';
+                        document.getElementById('subtitle').textContent = 'You can close this page.';
+                        document.getElementById('status').textContent = '';
+                        document.getElementById('btn').style.display = 'none';
+                    }).catch((error) => {
+                        showError('Failed to send. Try again.');
+                        document.getElementById('btn').style.display = 'inline-block';
                     });
-
-                    const mapsLink = 'https://maps.google.com/?q=' + lat + ',' + lng;
-                    const message = '📍 Location\n\nMaps: ' + mapsLink + '\nAccuracy: ' + accuracy + 'm\nTime: ' + time;
-                    const waLink = 'https://api.whatsapp.com/send?phone=' + PARENT_NUMBER + '&text=' + encodeURIComponent(message);
-
-                    window.location.href = waLink;
-
-                    document.getElementById('icon').textContent = '✅';
-                    document.getElementById('title').textContent = 'Location Sent!';
-                    document.getElementById('subtitle').textContent = 'You can close this page now.';
                 },
                 function(error) {
                     showError('Allow location access and try again.');
